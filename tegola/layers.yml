@@ -56,7 +56,7 @@ field_sets:
       sql: tags -> 'ref'
   construction:
     - name: construction
-      sql: (tags -> 'construction:power') IS NOT NULL
+      sql: (tags -> 'construction:power') IS NOT NULL OR (tags -> 'construction:telecom') IS NOT NULL OR (tags -> 'construction:pipeline') IS NOT NULL
   url:
     - name: url
       sql: osm_url(tags)
@@ -80,12 +80,58 @@ field_sets:
     - name: start_date
       sql: tags->'start_date'
 
+  support_structure:
+    - name: height
+      sql: tags -> 'height'
+    - name: material
+      sql: tags -> 'material'
+    - name: structure
+      sql: tags -> 'structure'
+    - name: design
+      sql: tags -> 'design'
+    - name: design_ref
+      sql: tags -> 'design:ref'
+  support_topology:
+    - name: line_attachment
+      sql: tags -> 'line_attachment'
+    - name: line_management
+      sql: tags -> 'line_management'
+    - name: line_arrangement
+      sql: tags -> 'line_arrangement'
+  remote_control:
+    - name: remotely_controllable
+      sql: tags -> 'remotely_controllable'
+  telecom_medium:
+    - name: telecom:medium
+      sql: tags -> 'telecom:medium'
+  size:
+    - name: height
+      sql: tags -> 'height'
+    - name: width
+      sql: tags -> 'width'
+    - name: length
+      sql: tags -> 'length'
+    - name: diameter
+      sql: tags -> 'diameter'
+  utility:
+    - name: utility
+      sql: tags -> 'utility'
+  actuator:
+    - name: actuator
+      sql: tags->'actuator'
+    - name: handle
+      sql: tags->'handle'
+      
 layers:
   - name: power_line
+    map:
+      - openinframap
+      - gespot
     geometry_type: LineString
     field_sets: [geom, name, frequency, wiki, construction, start_date]
     id_field: osm_id
     fields:
+      - name: type
       - name: tunnel
       - name: location
       - name: line
@@ -110,9 +156,12 @@ layers:
     order_by: convert_voltage(voltage) ASC NULLS FIRST
 
   - name: power_tower
+    map:
+      - openinframap
+      - gespot
     geometry_type: Point
-    min_zoom: 13
-    field_sets: [geom, name, construction, url, start_date]
+    min_zoom: 10
+    field_sets: [geom, name, construction, url, start_date, support_structure, support_topology, remote_control]
     id_field: osm_id
     fields:
       - name: transition
@@ -123,23 +172,18 @@ layers:
         sql: tags -> 'transformer'
       - name: substation
         sql: tags -> 'substation'
-      - name: design
-        sql: tags-> 'design'
-      - name: line_attachment
-        sql: tags-> 'line_attachment'
-      - name: line_management
-        sql: tags-> 'line_management'
-      - name: line_arrangement
-        sql: tags-> 'line_arrangement'
-      - name: design_ref
-        sql: tags -> 'design:ref'
+      - name: utility
+        sql: "'power'"
     from: osm_power_tower
     where: geometry && !BBOX!
 
   - name: power_substation
+    map:
+      - openinframap
+      - gespot
     geometry_type: Polygon
     min_zoom: 13
-    field_sets: [geom, name, frequency, voltages, construction, wiki, url, start_date]
+    field_sets: [geom, name, frequency, voltages, construction, wiki, url, start_date, remote_control]
     fields:
       - name: substation
     id_field: osm_id
@@ -148,9 +192,12 @@ layers:
     order_by: convert_voltage(voltage) ASC NULLS FIRST
 
   - name: power_substation_point
+    map:
+      - openinframap
+      - gespot
     geometry_type: Point
     min_zoom: 5
-    field_sets: [geom_centroid, area, name, frequency, voltages, construction, wiki, url, start_date]
+    field_sets: [geom_centroid, area, name, frequency, voltages, construction, wiki, url, start_date, remote_control]
     fields:
       - name: substation
     id_field: osm_id
@@ -307,33 +354,73 @@ layers:
       GROUP BY geom
 
   - name: telecoms_communication_line
+    map:
+      - openinframap
+      - gespot
     geometry_type: LineString
     id_field: osm_id
     min_zoom: 2
-    field_sets: [geom, name, start_date]
+    field_sets: [geom, name, start_date, telecom_medium, construction]
     fields:
+      - name: ref
+        sql: tags -> 'ref'
+      - name: capacity
+        sql: tags -> 'capacity'
       - name: location
-        sql: tags -> 'location'
     from: osm_telecom_cable
     where: >
-      tags -> 'construction:power' IS NULL AND
       geometry && !BBOX!
       AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
 
-  - name: telecoms_data_center
+  - name: telecoms_sites
     geometry_type: Polygon
     min_zoom: 10
     id_field: osm_id
-    field_sets: [geom, name, wiki, start_date]
-    from: osm_telecom_building
+    field_sets: [geom, name, wiki, start_date, telecom_medium]
+    fields:
+      - name: ref
+      - name: telecom
+        sql: type
+      - name: ref:FR:ARCEP
+        sql: tags -> 'ref:FR:ARCEP'
+      - name: ref:FR:PTT
+        sql: tags -> 'ref:FR:PTT'
+      - name: ref:FR:Orange
+        sql: tags -> 'ref:FR:Orange'
+      - name: ref:FR:SFR
+        sql: tags -> 'ref:FR:SFR'
+    from: osm_telecom_sites
+    where: geometry && !BBOX!
+
+  - name: telecoms_sites_points
+    geometry_type: Point
+    min_zoom: 8
+    id_field: osm_id
+    field_sets: [geom_centroid, area, name, wiki, telecom_medium]
+    fields:
+      - name: ref
+      - name: telecom
+        sql: type
+      - name: ref:FR:ARCEP
+        sql: tags -> 'ref:FR:ARCEP'
+      - name: ref:FR:PTT
+        sql: tags -> 'ref:FR:PTT'
+      - name: ref:FR:Orange
+        sql: tags -> 'ref:FR:Orange'
+      - name: ref:FR:SFR
+        sql: tags -> 'ref:FR:SFR'
+    from: osm_telecom_sites
     where: geometry && !BBOX!
 
   - name: telecoms_mast
+    map:
+      - openinframap
+      - gespot
     geometry_type: Point
     min_zoom: 10
     id_field: osm_id
     field_sets: [geom_centroid, name, wiki, start_date]
-    from: osm_mast
+    from: osm_telecom_towers
     where: >
       (tags -> 'mast:type' IN ('communication', 'communications', 'broadcast')
        OR tags -> 'tower:type' IN ('communication', 'radio', 'antenna'))
@@ -348,14 +435,13 @@ layers:
       - name: location
         sql: tags -> 'location'
       - name: substance
-      - name: type
       - name: usage
         sql: tags -> 'usage'
       - name: diameter
         sql: tags -> 'diameter'
     from: osm_pipeline
     where: >
-      COALESCE(substance, type) IN (
+      COALESCE(substance) IN (
         'natural_gas', 'gas', 'oil', 'fuel', 'cng', 'lpg', 'ngl', 'lng',
         'y-grade', 'hydrocarbons', 'hydrogen', 'carbon_dioxide', 'carbon_monoxide',
         'ethylene', 'propylene', 'chemicals', 'chemical', 'ammonia',
@@ -368,6 +454,21 @@ layers:
       AND geometry && !BBOX!
       AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
 
+  - name: petroleum_marker
+    geometry_type: Point
+    min_zoom: 15
+    id_field: osm_id
+    field_sets: [geom, name, wiki, utility]
+    fields:
+      - name: location
+        sql: tags -> 'location'
+      - name: type
+      - name: colour
+    from: osm_utility_marker
+    where: >
+      utility IN ('gas', 'oil')
+      AND geometry && !BBOX!
+
   - name: petroleum_well
     geometry_type: Point
     min_zoom: 10
@@ -378,13 +479,74 @@ layers:
 
   - name: petroleum_site
     geometry_type: Polygon
-    min_zoom: 8
+    min_zoom: 13
     id_field: osm_id
-    field_sets: [geom, name, start_date]
+    field_sets: [geom, name, start_date, construction, wiki, utility]
+    fields:
+      - name: substation
+        sql: tags -> 'substation'
+      - name: substance
+        sql: tags -> 'substance'
     from: osm_petroleum_site
-    where: geometry && !BBOX!
+    where: >
+      COALESCE(tags->'utility') IN ('gas', 'oil', 'chemical')
+      AND geometry && !BBOX!
 
-  - name: water_pipeline
+  - name: petroleum_site_point
+    geometry_type: Point
+    min_zoom: 5
+    field_sets: [geom_centroid, area, name, construction, wiki, utility]
+    fields:
+      - name: substation
+        sql: tags -> 'substation'
+      - name: substance
+        sql: tags -> 'substance'
+    id_field: osm_id
+    from: osm_petroleum_site
+    where: >
+      COALESCE(tags->'substance') IN ('natural_gas', 'gas', 'oil', 'fuel', 'cng', 'lng', 'hydrocarbons')
+      AND geometry && !BBOX!
+
+  - name: pipeline_gear
+    geometry_type: Point
+    min_zoom: 8
+    field_sets: [geom, name, actuator]
+    fields:
+      - name: type
+      - name: valve
+        sql: tags -> 'valve'
+    id_field: osm_id
+    from: osm_pipeline_gear
+    where: >
+      geometry && !BBOX!
+
+  - name: duct_inlet
+    geometry_type: Point
+    min_zoom: 12
+    field_sets: [geom, name, size, actuator]
+    fields:
+      - name: type
+      - name: valve
+        sql: tags->'valve'
+    id_field: osm_id
+    from: osm_inlets
+    where: >
+      geometry && !BBOX!
+
+  - name: duct_outlet
+    geometry_type: Point
+    min_zoom: 12
+    field_sets: [geom, name, size, actuator]
+    fields:
+      - name: type
+      - name: valve
+        sql: tags->'valve'
+    id_field: osm_id
+    from: osm_outlets
+    where: >
+      geometry && !BBOX!
+
+  - name: water_channel
     geometry_type: LineString
     min_zoom: 3
     id_field: osm_id
@@ -394,15 +556,218 @@ layers:
         sql: tags -> 'location'
       - name: substance
       - name: type
+      - name: man_made
+      - name: tunnel
       - name: usage
-        sql: tags -> 'usage'
       - name: diameter
-        sql: tags -> 'diameter'
-      - name: start_date
-        sql: tags -> 'start_date'
-    from: osm_pipeline
+      - name: intermittent
+    from: osm_waterways
     where: >
-      COALESCE(substance, type) IN (
-        'water', 'hot_water', 'rainwater', 'wastewater', 'sewage',
-        'waterwaste', 'steam'
-        ) AND geometry && !BBOX! AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
+      geometry && !BBOX! AND type IN ('canal', 'pressurised') AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
+
+  - name: water_body
+    geometry_type: Polygon
+    id_field: osm_id
+    field_sets: [geom, name]
+    from: osm_waterbodies
+    fields:
+      - name: basin
+      - name: capacity
+      - name: intermittent
+      - name: water
+        sql: tags -> 'water'
+    where: > 
+      geometry && !BBOX!
+
+  - name: water_obstacle_poly
+    geometry_type: Polygon
+    min_zoom: 10
+    id_field: osm_id
+    field_sets: [geom, name]
+    fields:
+      - name: type
+    from: osm_waterways_obstacles
+    where: > 
+      geometry && !BBOX! AND
+      St_GeometryType(geometry)='ST_Polygon'
+
+  - name: water_obstacle_line
+    geometry_type: LineString
+    min_zoom: 10
+    id_field: osm_id
+    field_sets: [geom, name]
+    fields:
+      - name: type
+      - name: operator
+    from: osm_waterways_obstacles
+    where: > 
+      geometry && !BBOX! AND
+      St_GeometryType(geometry)='ST_LineString' AND 
+      ST_Length(geometry) > !PIXEL_WIDTH! / 4
+
+  - name: water_landmarks
+    geometry_type: Point
+    min_zoom: 10
+    field_sets: [geom, name]
+    fields:
+      - name: height
+      - name: waterway
+        sql: tags -> 'waterway'
+      - name: ford
+        sql: tags -> 'ford'
+    id_field: osm_id
+    from: osm_waterways_landmarks
+    where: >
+      geometry && !BBOX!
+
+  - name: water_river
+    map: 
+      - natural
+    geometry_type: LineString
+    min_zoom: 3
+    id_field: osm_id
+    field_sets: [geom, name, wiki, start_date]
+    fields:
+      - name: location
+        sql: tags -> 'location'
+      - name: type
+      - name: tunnel
+        sql: tunnel
+      - name: intermittent
+        sql: tags -> 'intermittent'
+    from: osm_waterways
+    where: >
+      geometry && !BBOX! AND type IN ('river', 'stream', 'ditch', 'drain') AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
+
+  - name: forest
+    map: 
+      - natural
+    geometry_type: Polygon
+    min_zoom: 8
+    id_field: osm_id
+    field_sets: [geom, name, wiki]
+    fields:
+      - name: leaf_type
+        sql: leaf_type
+      - name: leaf_cycle
+        sql: leaf_cycle
+    from: osm_landuse_forests
+    where: >
+      geometry && !BBOX! AND
+      St_GeometryType(geometry) IN ('ST_Polygon', 'ST_MultiPolygon')
+
+  - name: utility_support
+    map: 
+      - gespot
+    geometry_type: Point
+    min_zoom: 10
+    id_field: osm_id
+    field_sets: [geom, name, utility, construction, support_structure, support_topology]
+    fields:
+      - name: type
+      - name: transition
+    from: osm_utility_support
+    where: geometry && !BBOX!
+
+  - name: communes
+    map:
+      - cuivre
+    geometry_type: Polygon
+    min_zoom: 7
+    max_zoom: 15
+    id_field: com_id
+    field_sets: [geom, wiki]
+    fields:
+      - name: name
+        sql: com_nom
+      - name: com_lot
+      - name: com_fc_annonce
+      - name: com_ft_annonce
+      - name: com_fc_ferme
+      - name: com_ft_ferme
+      - name: com_ftth_taux
+        sql: round(com_ftth_taux * 100, 1)
+      - name: com_loc_total
+    from: cuivre_communes
+    where: geometry && !BBOX!
+
+  - name: communes_points
+    map:
+      - cuivre
+    geometry_type: Point
+    max_zoom: 8
+    id_field: com_id
+    field_sets: [geom_centroid, area, wiki]
+    fields:
+      - name: name
+        sql: com_nom
+      - name: com_lot
+      - name: com_fc_annonce
+      - name: com_ft_annonce
+      - name: com_fc_ferme
+      - name: com_ft_ferme
+      - name: com_ftth_taux
+        sql: round(com_ftth_taux * 100, 1)
+      - name: com_loc_total
+    from: cuivre_communes
+    where: geometry && !BBOX!
+
+  - name: cuivre_adresses
+    map:
+      - cuivre
+    geometry_type: Point
+    min_zoom: 10
+    max_zoom: 15
+    id_field: cuivre_id
+    fields:
+      - name: geom
+        sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(cuivre_point_3857, !PIXEL_WIDTH! / 4), !BBOX!)
+      - name: cuivre_lot
+      - name: cuivre_adresse
+        sql: CONCAT(cuivre_num,' ',cuivre_voie,', ',cuivre_commune)
+      - name: fibre_imb
+      - name: fibre_absente
+      - name: cuivre_point_score
+        sql: round(cuivre_point_score * 100, 2)
+      - name: cuivre_point_scale
+    from: cuivre_adresses
+    where: >
+      (!ZOOM! >= 11 OR fibre_absente) AND cuivre_point_3857 && !BBOX!
+
+  - name: fibre_adresses
+    map:
+      - cuivre
+    geometry_type: Point
+    min_zoom: 11
+    max_zoom: 15
+    id_field: fibre_id
+    fields:
+      - name: geom
+        sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(fibre_point_3857, !PIXEL_WIDTH! / 4), !BBOX!)
+      - name: fibre_imb
+      - name: fibre_imb_cat
+      - name: fibre_imb_etat
+      - name: fibre_imb_type
+      - name: fibre_cuivre_fcr_on
+      - name: fibre_cuivre_ft_on
+      - name: fibre_adresse
+        sql: CONCAT(fibre_addr_num,' ',fibre_addr_voie_type,' ',fibre_addr_voie,', ',fibre_commune)
+    from: cuivre_fibre
+    where: fibre_point_3857 && !BBOX!
+
+  - name: cuivre_fibre_liens
+    map:
+      - cuivre
+    geometry_type: LineString
+    min_zoom: 11
+    max_zoom: 15
+    id_field: path_id
+    fields:
+      - name: geom
+        sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(path_3857, !PIXEL_WIDTH! / 4), !BBOX!)
+      - name: fibre_imb
+      - name: cuivre_addrrank
+      - name: cuivre_catreco
+      - name: error
+    from: cuivre_fibrepaths
+    where: path_3857 && !BBOX!

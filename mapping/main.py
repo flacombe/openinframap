@@ -1,9 +1,14 @@
 import json
 from funcs import tables, generalized_tables
 
+import admin  # noqa
+import landuse  # noqa
 import power  # noqa
 import telecoms  # noqa
 import petroleum  # noqa
+import water  # noqa
+import utility  # noqa
+import emergency  # noqa
 
 
 data = {
@@ -16,15 +21,11 @@ data = {
             "source",
             "source:*",
             "tiger:*",
-            "landuse",
             "highway",
-            "amenity",
             "office",
             "shop",
             "addr:*",
-            "natural",
             "surface",
-            "waterway",
             "oneway",
             "service",
             "wall",
@@ -49,7 +50,6 @@ data = {
             "crossing",
             "lacounty:*",
             "osak:*",
-            "water",
             "yh:*",
             "tourism",
             "entrance",
@@ -59,7 +59,7 @@ data = {
             "leaf_cycle",
             "bus",
             "opening_hours",
-            "wheelchair",
+            "wheelchair"
         ],
     },
     "tables": tables,

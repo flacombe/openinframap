@@ -9,8 +9,11 @@ const colour_intermediate: ColorSpecification = '#78CC9E'
 const colour_hydrogen: ColorSpecification = '#CC78AB'
 const colour_co2: ColorSpecification = '#7885CC'
 const colour_unknown: ColorSpecification = '#BABABA'
+const colour_neutral: ColorSpecification = '#ABABAB'
 
 const substance: ExpressionSpecification = ['coalesce', ['get', 'substance'], ['get', 'type'], '']
+const utility: ExpressionSpecification = ["coalesce", ["get", "utility"], ""];
+const substation: ExpressionSpecification = ["coalesce", ["get", "substation"], ""];
 
 const pipeline_colour: ExpressionSpecification = [
   'match',
@@ -30,6 +33,14 @@ const pipeline_colour: ExpressionSpecification = [
   colour_unknown
 ]
 
+const marker_colour: ExpressionSpecification = ["match",
+  utility,
+  ['gas'], colour_gas,
+  ['oil'], colour_oil,
+  ['chemical'], colour_hydrogen,
+  colour_neutral
+]
+
 const pipeline_label: ExpressionSpecification = [
   'concat',
   ['case', ['has', 'name'], ['get', 'name'], ['get', 'operator']],
@@ -40,6 +51,33 @@ const pipeline_label: ExpressionSpecification = [
     substance
   ]
 ]
+
+const construction_p: ExpressionSpecification = ['get', 'construction'];
+const pipeline_opacity: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'],
+  4, ['case', construction_p, 0.3, 0.6],
+  8, ['case', construction_p, 0.3, 1]
+];
+
+// Determine substation visibility
+const substation_visible_p: ExpressionSpecification = [
+  'any',
+  [
+    'all',
+    ['==', substation, "transmission"],
+    ['>', ['zoom'], 4]
+  ],
+  ['>', ['zoom'], 9],
+];
+
+// Determine the minimum zoom a point is visible at (before it can be seen as an
+// area), based on the area of the substation.
+const substation_point_visible_p: ExpressionSpecification = [
+  'any',
+  ['==', ['coalesce', ['get', 'area'], 0], 0], // Area = 0 - mapped as node
+  ['all', ['<', ['coalesce', ['get', 'area'], 0], 100], ['<', ['zoom'], 16]],
+  ['all', ['<', ['coalesce', ['get', 'area'], 0], 250], ['<', ['zoom'], 15]],
+  ['<', ['zoom'], 13],
+];
 
 const layers: LayerSpecificationWithZIndex[] = [
   {
@@ -87,6 +125,21 @@ const layers: LayerSpecificationWithZIndex[] = [
     }
   },
   {
+    zorder: 2,
+    id: 'petroleum_marker',
+    type: 'circle',
+    source: 'openinframap',
+    minzoom: 15.5,
+    'source-layer': 'petroleum_marker',
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'],
+        15.5, 2,
+        18.5, 5
+      ],
+      'circle-color': marker_colour
+    },
+  },
+  {
     zorder: 100,
     id: 'petroleum_site',
     type: 'fill',
@@ -112,6 +165,34 @@ const layers: LayerSpecificationWithZIndex[] = [
       'circle-stroke-width': 1,
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 1, 12, 2, 14, 5]
     }
+  },{
+    zorder: 288,
+    id: 'petroleum_substation_point',
+    type: 'circle',
+    filter: ['all', substation_visible_p, substation_point_visible_p],
+    source: 'openinframap',
+    'source-layer': 'petroleum_site_point',
+    minzoom: 5,
+    layout: {},
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'],
+        5, ["match",
+          substation,
+          ['transmission'], 2.5,
+          1
+        ],
+        15, ["match",
+          substation,
+          ['transmission'], 7,
+          5
+        ]
+      ],
+      'circle-color': pipeline_colour,
+      'circle-stroke-opacity': 1,
+      'circle-stroke-color': '#636363',
+      'circle-stroke-width': 0.5,
+      'circle-opacity': pipeline_opacity
+    },
   },
   {
     zorder: 500,
@@ -162,6 +243,21 @@ const layers: LayerSpecificationWithZIndex[] = [
       'text-size': 10
     },
     paint: text_paint
+  },
+  {
+    zorder: 503,
+    id: 'petroleum_marker_label',
+    type: 'symbol',
+    source: 'openinframap',
+    'source-layer': 'petroleum_marker',
+    minzoom: 16.5,
+    layout: {
+      'text-field': '{ref}',
+      'text-anchor': 'top',
+      'text-offset': [0, 0.5],
+      'text-size': 10,
+    },
+    paint: text_paint,
   }
 ]
 

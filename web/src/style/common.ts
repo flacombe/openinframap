@@ -19,6 +19,11 @@ const operator_text: ExpressionSpecification = [
   ['case', ['has', 'operator'], ['concat', ['get', 'name'], ' (', ['get', 'operator'], ')'], ['get', 'name']]
 ]
 
+const operator_label: ExpressionSpecification = ["case", ['has', 'operator'],
+      ["concat", ' (', ['get', 'operator'], ')'],
+      ''
+]
+
 const underground_p: ExpressionSpecification = [
   'any',
   ['==', ['get', 'location'], 'underground'],
@@ -33,4 +38,4 @@ const underground_p: ExpressionSpecification = [
 
 const font = ['Noto Sans Regular']
 
-export { text_paint, operator_text, underground_p, font }
+export { text_paint, operator_text, operator_label, underground_p, font }

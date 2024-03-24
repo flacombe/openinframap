@@ -18,12 +18,10 @@ import {
   colour_unknown
 } from '../style/style_oim_petroleum.js'
 import {
-  colour_freshwater,
-  colour_wastewater,
-  colour_hotwater,
-  colour_steam
-} from '../style/style_oim_water.js'
-import { svgLine, svgLineFromLayer, svgRectFromLayer } from './svg.js'
+  default as water_layers,
+  usage_scale
+} from '../style/style_oim_water.js';
+import { svgLine, svgLineFromLayer, svgRectFromLayer, svgCircleFromLayer } from './svg.js'
 import './key.css'
 // @ts-expect-error Vite virtual module
 import { manifest } from 'virtual:render-svg'
@@ -113,20 +111,22 @@ class KeyControl implements IControl {
     mount(this._container, this.header())
 
     const pane = el('.oim-key-pane')
-    pane.appendChild(el('h3', 'Power Lines'))
+    pane.appendChild(el('h3', 'Réseau électrique'))
     mount(pane, await this.voltageTable())
-    pane.appendChild(el('h3', 'Power Plants'))
+    pane.appendChild(el('h3', 'Centrales électriques'))
     mount(pane, await this.plantTable())
-    pane.appendChild(el('h3', 'Power Generators'))
+    pane.appendChild(el('h3', 'Générateurs électriques'))
     mount(pane, await this.generatorTable())
-    pane.appendChild(el('h3', 'Other Power'))
+    pane.appendChild(el('h3', 'Autres énergies'))
     mount(pane, await this.towerTable())
-    pane.appendChild(el('h3', 'Telecoms'))
+    pane.appendChild(el('h3', 'Télécoms'))
     mount(pane, await this.telecomTable())
-    pane.appendChild(el('h3', 'Petroleum'))
+    pane.appendChild(el('h3', 'Oil & gaz'))
     mount(pane, this.petroleumTable())
-    pane.appendChild(el('h3', 'Water'))
-    mount(pane, this.waterTable())
+    pane.appendChild(el('h3', 'Eau canalisée'))
+    mount(pane, this.waterUsageTable());
+    pane.appendChild(el('h3', 'Fontainerie'));
+    mount(pane, this.waterGearTable());
     this._pane = pane
 
     mount(this._container, pane)
@@ -151,7 +151,7 @@ class KeyControl implements IControl {
 
     rows = rows.map((row) => [row[0], svgLine(row[1], line_thickness)])
 
-    rows.push(['Underground', svgLine('#7A7A85', line_thickness, '3 2')])
+    rows.push(['Souterrain', svgLine('#7A7A85', line_thickness, '3 2')])
     rows.push(['Line Reference', await this.sprite('power_line_ref')])
 
     const table = list('table', Tr)
@@ -182,8 +182,8 @@ class KeyControl implements IControl {
 
   async generatorTable() {
     const rows = [
-      ['Wind Turbine', await this.sprite('power_wind', 14)],
-      ['Solar Panel', svgRectFromLayer(power_layers, 'power_solar_panel')]
+      ['Eolienne', await this.sprite('power_wind', 14)],
+      ['Panneau PV', svgRectFromLayer(power_layers, 'power_solar_panel')]
     ]
     const table = list('table', Tr)
     table.update(rows)
@@ -192,14 +192,14 @@ class KeyControl implements IControl {
 
   async towerTable() {
     const rows = [
-      ['Tower/Pylon', await this.sprite('power_tower', 10)],
-      ['Transition Tower', await this.sprite('power_tower_transition', 10)],
-      ['Pole', await this.sprite('power_pole', 8)],
-      ['Transition Pole', await this.sprite('power_pole_transition', 8)],
-      ['Transformer', await this.sprite('power_transformer')],
-      ['Switch', await this.sprite('power_switch')],
-      ['Compensator', await this.sprite('power_compensator')],
-      ['Converter', await this.sprite('converter')]
+      ['Pylônes', await this.sprite('power_tower', 10)],
+      ['Pylône émergence', await this.sprite('power_tower_transition', 10)],
+      ['Poteaux', await this.sprite('power_pole', 8)],
+      ['Poteau émergence', await this.sprite('power_pole_transition', 8)],
+      ['Transformateur', await this.sprite('power_transformer')],
+      ['Organe', await this.sprite('power_switch')],
+      ['Compensateur', await this.sprite('power_compensator')],
+      ['Convertisseur', await this.sprite('converter')]
     ]
     const table = list('table', Tr)
     table.update(rows)
@@ -208,8 +208,8 @@ class KeyControl implements IControl {
 
   async telecomTable() {
     const rows = [
-      ['Cable', svgLineFromLayer(comms_layers, 'telecoms_line')],
-      ['Tower/Mast', await this.sprite('comms_tower')],
+      ['Câble', svgLineFromLayer(comms_layers, 'telecoms_line')],
+      ['Pylône', await this.sprite('comms_tower')],
       ['Datacenter/Exchange', svgRectFromLayer(comms_layers, 'telecoms_data_center')]
     ]
     const table = list('table', Tr)
@@ -233,16 +233,37 @@ class KeyControl implements IControl {
     return table
   }
 
-  waterTable() {
-    const rows = [
-      ['Fresh Water', svgLine(colour_freshwater, line_thickness)],
-      ['Hot Water', svgLine(colour_hotwater, line_thickness)],
-      ['Steam', svgLine(colour_steam, line_thickness)],
-      ['Wastewater', svgLine(colour_wastewater, line_thickness)]
-    ]
-    const table = list('table', Tr)
-    table.update(rows)
-    return table
+  waterUsageTable() {
+    let rows = [];
+    for (let row of usage_scale) {
+      let label = row[0];
+      if (label == null){
+        label = "Unknown";
+      }
+      if (row[1] == null) {
+        continue;
+      }
+
+      rows.push([label.charAt(0).toUpperCase() + label.slice(1), svgLine(row[1], 4)]);
+    }
+
+    let table = list('table', Tr);
+    table.update(rows);
+    return table;
+  }
+
+  waterGearTable() {
+    let rows = [];
+
+    rows.push(['Reservoir', svgRectFromLayer(water_layers, 'water_bodies')]);
+    rows.push(['Obstacle', svgRectFromLayer(water_layers, 'water_obstacles_poly')]);
+    rows.push(['Valve', svgCircleFromLayer(water_layers, 'water_structure_gear')]);
+    rows.push(['Inlet', svgCircleFromLayer(water_layers, 'water_flow_inlet')]);
+    rows.push(['Outlet', svgCircleFromLayer(water_layers, 'water_flow_outlet')]);
+
+    let table = list('table', Tr);
+    table.update(rows);
+    return table;
   }
 }
 
