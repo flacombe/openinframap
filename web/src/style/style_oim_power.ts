@@ -195,6 +195,30 @@ const substation_radius: ExpressionSpecification = interpolate(zoom, [
   [20, 8]
 ])
 
+const substation_remote_stroke: ExpressionSpecification = ["match",
+  ["get", "remotely_controllable"],
+    "radio", "#ad3333",
+    "telephone", "#d1a423",
+    "yes", "#991e9f",
+    "#333"
+  ]
+
+const substation_remote_thickness: ExpressionSpecification = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  5, 0,
+  6, 0.1,
+  8, 0.5,
+  12, ["match",
+    ["get", "remotely_controllable"],
+    "radio", 2,
+    "telephone", 2,
+    "yes", 2,
+    1
+  ]
+]
+
 // Determine the minimum zoom a point is visible at (before it can be seen as an
 // area), based on the area of the substation.
 const substation_point_visible_p: ExpressionSpecification = any(

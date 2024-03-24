@@ -2,11 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Open Infrastructure Map</title>
-    <meta property="og:title" content="Open Infrastructure Map" />
+    <title>Cartographie - Infos-Réseaux.com</title>
+    <meta property="og:title" content="Cartographie - Infos-Réseaux.com" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@openinframap" />
-    <meta name="twitter:creator" content="@russss" />
+    <meta name="twitter:site" content="@InfosReseaux" />
+    <meta name="twitter:creator" content="@InfosReseaux" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
@@ -17,25 +17,31 @@
       content="Open map of the world's electricity, telecoms, oil, and gas infrastructure, using data from OpenStreetMap."
     />
     <link rel="me" href="https://en.osm.town/@OpenInfraMap" />
-    <link rel="canonical" href="https://openinframap.org" />
+    <link rel="canonical" href="https://map.infos-reseaux.com" />
+
+    <!-- Matomo -->
+    <script>
+      var _paq = window._paq = window._paq || [];
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      (function() {
+        var u="https://stats.openstreetmap.fr/";
+        _paq.push(['setTrackerUrl', u+'matomo.php']);
+        _paq.push(['setSiteId', '8']);
+        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+        g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+      })();
+    </script>
+    <!-- End Matomo Code -->
   </head>
   <body>
     <noscript>You must have Javascript enabled to view Open Infrastructure Map</noscript>
     <div id="container" style="display: none">
       <header>
-        <h1>Open Infrastructure Map</h1>
+        <h1>Infos-Réseaux.com</h1>
         <nav>
           <ul>
-            <li><a href="/about" data-i18n="nav.about">about</a></li>
-            <li><a href="/stats" data-i18n="nav.stats">stats</a></li>
-            <li
-              ><a
-                href="https://www.infrageomatics.com/products/osm-export"
-                target="_blank"
-                data-i18n="nav.exports"
-                >exports</a
-              >
-            </li>
+            <li><a href="/about-fr.html" data-i18n="nav.about">A propos</a></li>
           </ul>
         </nav>
       </header>

@@ -5,16 +5,16 @@ from funcs import (
     str_col,
     int_col,
     bool_col,
-    type_col,
+    type_col
 )
 
 
 table(
     "power_line",
     {
-        "power": ["line", "minor_line", "cable", "minor_cable"],
-        "construction:power": ["line", "minor_line", "cable", "minor_cable"],
-        "disused:power": ["line", "minor_line", "cable", "minor_cable"],
+        "power": ["line", "minor_line", "cable"],
+        "construction:power": ["line", "minor_line", "cable"],
+        "disused:power": ["line", "minor_line", "cable"],
     },
     "linestring",
     columns=[
@@ -22,6 +22,7 @@ table(
         str_col("location"),
         str_col("line"),
         str_col("voltage"),
+        int_col("convert_power(voltage)", "voltage_max"),
         str_col("frequency"),
         int_col("circuits"),
         str_col("construction:power", "construction"),
@@ -65,9 +66,9 @@ generalized_table(
 table(
     "power_tower",
     {
-        "power": ["tower", "pole", "portal"],
-        "construction:power": ["tower", "pole", "portal"],
-        "disused:power": ["tower", "pole", "portal"],
+        "power": ["tower", "pole", "portal", "insulator", "terminal"],
+        "construction:power": ["tower", "pole", "portal", "insulator", "terminal"],
+        "disused:power": ["tower", "pole", "portal", "insulator", "terminal"]
     },
     ["points", "linestrings"],
     columns=[
@@ -89,9 +90,7 @@ table(
         type_col,
         str_col("substation"),
         str_col("voltage"),
-        str_col("frequency"),
         str_col("construction:power", "construction"),
-        bool_col("tunnel"),
     ],
 )
 
@@ -105,12 +104,9 @@ relation_tables(
     relation_columns=[
         str_col("substation"),
         str_col("voltage"),
-        str_col("frequency"),
         str_col("construction:power", "construction"),
-        bool_col("tunnel"),
     ],
 )
-
 
 table(
     "power_switchgear",
@@ -119,13 +115,16 @@ table(
             "switch",
             "transformer",
             "compensator",
-            "insulator",
-            "terminal",
             "converter",
         ]
     },
     ["points", "polygons"],
-    columns=[str_col("voltage"), type_col],
+    columns=[
+        str_col("voltage"),
+        str_col("switch"),
+        str_col("transformer"),
+        type_col
+    ],
 )
 
 

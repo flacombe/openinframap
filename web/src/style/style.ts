@@ -37,7 +37,7 @@ function sunPosition(date: Date): [number, number, number] {
 
 const style: StyleSpecification = {
   version: 8,
-  name: 'Open Infrastructure Map',
+  name: 'InfosReseaux',
   projection: {
     type: 'globe'
   },
@@ -57,11 +57,11 @@ const style: StyleSpecification = {
     position: sunPosition(new Date())
   },
   sources: {
-    basemap: {
-      type: 'vector',
-      tiles: ['https://openinframap.org/20250311/{z}/{x}/{y}.mvt'],
+    openmaptiles: {
+      type: "vector",
+      url: 'https://api.maptiler.com/tiles/v3/tiles.json?key=2raHq2ahXwNHsKorHH5t',
       maxzoom: 15,
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+      attribution: '<a href="https://openmaptiles.org/">© OpenMapTiles</a>'
     },
     blackmarble: {
       type: 'raster',
@@ -119,6 +119,10 @@ const style: StyleSpecification = {
         type: 'FeatureCollection',
         features: []
       }
+    },
+    naturalmap: {
+      type: 'vector',
+      url: 'https://map.infos-reseaux.com/natural.json'
     }
   },
   glyphs: '/fonts/{fontstack}/{range}.pbf',

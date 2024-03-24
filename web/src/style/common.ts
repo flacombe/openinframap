@@ -20,6 +20,16 @@ export const text_paint = {
 }
 
 export const operator_text: ExpressionSpecification = step(['zoom'], get('name'), [
+const operator_label: ExpressionSpecification = ["case", ['has', 'operator'],
+      ["concat", ' (', ['get', 'operator'], ')'],
+      ''
+]
+
+const underground_p: ExpressionSpecification = [
+  'any',
+  ['==', ['get', 'location'], 'underground'],
+  ['==', ['get', 'location'], 'underwater'],
+  ['==', ['get', 'tunnel'], true],
   [
     14,
     case_(
