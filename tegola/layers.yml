@@ -706,6 +706,7 @@ layers:
       - name: com_fc_ferme
       - name: com_ft_ferme
       - name: com_ftth_taux
+        sql: round(com_ftth_taux * 100, 1)
       - name: com_loc_total
     from: cuivre_communes
     where: geometry && !BBOX!
@@ -726,6 +727,7 @@ layers:
       - name: fibre_imb
       - name: fibre_absente
       - name: cuivre_point_score
+        sql: round(cuivre_point_score * 100, 2)
       - name: cuivre_point_scale
     from: cuivre_adresses
     where: cuivre_point_3857 && !BBOX!
