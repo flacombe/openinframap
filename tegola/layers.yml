@@ -716,6 +716,27 @@ layers:
     map:
       - cuivre
     geometry_type: Point
+    min_zoom: 10
+    max_zoom: 11
+    id_field: cuivre_id
+    fields:
+      - name: geom
+        sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(cuivre_point_3857, !PIXEL_WIDTH! / 4), !BBOX!)
+      - name: cuivre_lot
+      - name: cuivre_adresse
+        sql: CONCAT(cuivre_num,' ',cuivre_voie,', ',cuivre_commune)
+      - name: fibre_imb
+      - name: fibre_absente
+      - name: cuivre_point_score
+        sql: round(cuivre_point_score * 100, 2)
+      - name: cuivre_point_scale
+    from: cuivre_adresses
+    where: fibre_absente=TRUE AND cuivre_point_3857 && !BBOX!
+
+  - name: cuivre_adresses
+    map:
+      - cuivre
+    geometry_type: Point
     min_zoom: 11
     max_zoom: 15
     id_field: cuivre_id
