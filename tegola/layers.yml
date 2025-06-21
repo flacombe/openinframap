@@ -767,5 +767,6 @@ layers:
       - name: fibre_imb
       - name: cuivre_addrrank
       - name: cuivre_catreco
+      - name: error
     from: cuivre_fibrepaths
     where: path_3857 && !BBOX!
