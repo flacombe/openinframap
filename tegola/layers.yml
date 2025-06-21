@@ -717,7 +717,7 @@ layers:
       - cuivre
     geometry_type: Point
     min_zoom: 10
-    max_zoom: 11
+    max_zoom: 10
     id_field: cuivre_id
     fields:
       - name: geom
