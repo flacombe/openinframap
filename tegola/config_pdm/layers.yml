@@ -66,7 +66,7 @@ layers:
       - name: nb
     from: pdm_boundary_tiles
     where: >
-      project='2021-01_poteaux'
+      project_id=1
       AND geom && !BBOX!
       AND ((admin_level=4 AND !ZOOM! <= 5) OR (admin_level=6 AND !ZOOM! BETWEEN 5 AND 8) OR (admin_level=8 AND !ZOOM! >= 8))
 
@@ -95,6 +95,6 @@ layers:
       - name: nb
     from: pdm_boundary_tiles
     where: >
-      project='2021-01_substations'
+      project_id=2
       AND geom && !BBOX!
       AND ((admin_level=4 AND !ZOOM! <= 5) OR (admin_level=6 AND !ZOOM! BETWEEN 5 AND 8) OR (admin_level=8 AND !ZOOM! >= 8))
