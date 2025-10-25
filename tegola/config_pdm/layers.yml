@@ -59,7 +59,7 @@ layers:
     field_sets: [geom, stats]
     id_field: id
     fields:
-      - name: project
+      - name: project_id
       - name: boundary
       - name: name
       - name: admin_level
@@ -88,7 +88,7 @@ layers:
     field_sets: [geom, stats]
     id_field: id
     fields:
-      - name: project
+      - name: project_id
       - name: boundary
       - name: name
       - name: admin_level
