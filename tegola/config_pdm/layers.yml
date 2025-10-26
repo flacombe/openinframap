@@ -19,6 +19,7 @@ field_sets:
       sql: stats::text
       
 layers:
+  # PDM Enedis - Poteaux
   - name: pdm_project_poteaux
     map:
       - pdm_project_poteaux
@@ -70,6 +71,7 @@ layers:
       AND geom && !BBOX!
       AND ((admin_level=4 AND !ZOOM! <= 5) OR (admin_level=6 AND !ZOOM! BETWEEN 5 AND 8) OR (admin_level=8 AND !ZOOM! >= 8))
 
+  # PDM Enedis - Postes électriques
   - name: pdm_project_substations
     map:
       - pdm_project_substations
@@ -96,5 +98,65 @@ layers:
     from: pdm_boundary_tiles
     where: >
       project_id=2
+      AND geom && !BBOX!
+      AND ((admin_level=4 AND !ZOOM! <= 5) OR (admin_level=6 AND !ZOOM! BETWEEN 5 AND 8) OR (admin_level=8 AND !ZOOM! >= 8))
+
+  # PDM FTTH - SRO
+  - name: pdm_project_connpoints
+    map:
+      - pdm_project_connpoints
+    geometry_type: Point
+    max_zoom: 15
+    field_sets: [geom, osm_id, tags]
+    id_field: gid
+    from: pdm_project_connpoints
+    where: geom && !BBOX!
+
+  - name: pdm_stats_connpoints
+    map:
+      - pdm_stats_connpoints
+    geometry_type: Point
+    max_zoom: 15
+    field_sets: [geom, stats]
+    id_field: id
+    fields:
+      - name: project_id
+      - name: boundary
+      - name: name
+      - name: admin_level
+      - name: nb
+    from: pdm_boundary_tiles
+    where: >
+      project_id=11
+      AND geom && !BBOX!
+      AND ((admin_level=4 AND !ZOOM! <= 5) OR (admin_level=6 AND !ZOOM! BETWEEN 5 AND 8) OR (admin_level=8 AND !ZOOM! >= 8))
+
+  # PDM FTTH - Exchanges
+  - name: pdm_project_exchanges
+    map:
+      - pdm_project_exchanges
+    geometry_type: Point
+    max_zoom: 15
+    field_sets: [geom, osm_id, tags]
+    id_field: gid
+    from: pdm_project_exchanges
+    where: geom && !BBOX!
+
+  - name: pdm_stats_exchanges
+    map:
+      - pdm_stats_exchanges
+    geometry_type: Point
+    max_zoom: 15
+    field_sets: [geom, stats]
+    id_field: id
+    fields:
+      - name: project_id
+      - name: boundary
+      - name: name
+      - name: admin_level
+      - name: nb
+    from: pdm_boundary_tiles
+    where: >
+      project_id=12
       AND geom && !BBOX!
       AND ((admin_level=4 AND !ZOOM! <= 5) OR (admin_level=6 AND !ZOOM! BETWEEN 5 AND 8) OR (admin_level=8 AND !ZOOM! >= 8))

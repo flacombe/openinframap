@@ -43,7 +43,7 @@ CREATE OR REPLACE VIEW power_plant AS
     SELECT osm_id, geometry, name, output, source, tags, construction
               FROM power_plant_relation;
 
-/* Projets enedis */
+/* PDM enedis */
 CREATE MATERIALIZED VIEW pdm_boundary AS 
   SELECT id, osm_id, type, name, admin_level, tags, geometry AS geom, ST_PointOnSurface(geometry)::GEOMETRY(Point, 3857) AS centre
   FROM osm_pdm_boundary
@@ -82,6 +82,17 @@ CREATE MATERIALIZED VIEW pdm_project_substations AS
 
 CREATE INDEX ON pdm_project_substations using gist(geom);
 CREATE INDEX ON pdm_project_substations using btree(osm_id);
+
+/* PDM FTTH */
+CREATE MATERIALIZED VIEW pdm_project_connpoints AS 
+  SELECT osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, ST_Centroid(geometry) AS geom
+  FROM osm_telecom_sites
+  WHERE type='connection_point';
+
+CREATE MATERIALIZED VIEW pdm_project_exchanges AS 
+  SELECT osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, ST_Centroid(geometry) AS geom
+  FROM osm_telecom_sites
+  WHERE type='exchange';
 
 /* OpenInfraMap views */
 CREATE OR REPLACE VIEW power_plant_relation_by_geom_type AS
