@@ -64,7 +64,7 @@ layers:
       - name: boundary
       - name: name
       - name: admin_level
-      - name: nb
+      - name: delta_full
     from: pdm_boundary_tiles
     where: >
       project_id=1
@@ -94,7 +94,7 @@ layers:
       - name: boundary
       - name: name
       - name: admin_level
-      - name: nb
+      - name: delta_full
     from: pdm_boundary_tiles
     where: >
       project_id=2
@@ -124,7 +124,7 @@ layers:
       - name: boundary
       - name: name
       - name: admin_level
-      - name: nb
+      - name: delta_full
     from: pdm_boundary_tiles
     where: >
       project_id=11
@@ -154,7 +154,7 @@ layers:
       - name: boundary
       - name: name
       - name: admin_level
-      - name: nb
+      - name: delta_full
     from: pdm_boundary_tiles
     where: >
       project_id=12
