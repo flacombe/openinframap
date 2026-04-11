@@ -14,9 +14,16 @@ field_sets:
   tags:
     - name: tags
       sql: tags::text
+  boundary:
+    - name: project_id
+    - name: admin_level
+    - name: boundary
+    - name: name
   stats:
     - name: stats
       sql: stats::text
+    - name: delta_full
+    - name: delta_last
       
 layers:
   # PDM Enedis - Poteaux
@@ -57,14 +64,8 @@ layers:
       - pdm_stats_poteaux
     geometry_type: Point
     max_zoom: 15
-    field_sets: [geom, stats]
+    field_sets: [geom, boundary, stats]
     id_field: id
-    fields:
-      - name: project_id
-      - name: boundary
-      - name: name
-      - name: admin_level
-      - name: delta_full
     from: pdm_boundary_tiles
     where: >
       project_id=1
@@ -87,14 +88,8 @@ layers:
       - pdm_stats_substations
     geometry_type: Point
     max_zoom: 15
-    field_sets: [geom, stats]
+    field_sets: [geom, boundary, stats]
     id_field: id
-    fields:
-      - name: project_id
-      - name: boundary
-      - name: name
-      - name: admin_level
-      - name: delta_full
     from: pdm_boundary_tiles
     where: >
       project_id=2
@@ -117,14 +112,8 @@ layers:
       - pdm_stats_connpoints
     geometry_type: Point
     max_zoom: 15
-    field_sets: [geom, stats]
+    field_sets: [geom, boundary, stats]
     id_field: id
-    fields:
-      - name: project_id
-      - name: boundary
-      - name: name
-      - name: admin_level
-      - name: delta_full
     from: pdm_boundary_tiles
     where: >
       project_id=11
@@ -147,14 +136,8 @@ layers:
       - pdm_stats_exchanges
     geometry_type: Point
     max_zoom: 15
-    field_sets: [geom, stats]
+    field_sets: [geom, boundary, stats]
     id_field: id
-    fields:
-      - name: project_id
-      - name: boundary
-      - name: name
-      - name: admin_level
-      - name: delta_full
     from: pdm_boundary_tiles
     where: >
       project_id=12
