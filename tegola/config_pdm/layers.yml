@@ -22,8 +22,8 @@ field_sets:
   stats:
     - name: stats
       sql: stats::text
-    - name: delta_full
-    - name: delta_last
+    - name: delta_project
+    - name: delta_daily
       
 layers:
   # PDM Enedis - Poteaux
