@@ -53,31 +53,31 @@ CREATE MATERIALIZED VIEW pdm_boundary AS
   CREATE INDEX ON pdm_boundary using btree(osm_id);
 
 CREATE MATERIALIZED VIEW pdm_project_poteaux AS 
-  SELECT osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, geometry AS geom
+  SELECT distinct on(osm_id) osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, geometry AS geom
   FROM osm_power_tower 
   WHERE type IN ('pole', 'tower') AND tags->'operator'='Enedis' AND St_geometryType(geometry)='ST_Point';
 
+CREATE INDEX ON pdm_project_poteaux using gist(geom);
+CREATE INDEX ON pdm_project_poteaux using btree(osm_id);
+
 CREATE VIEW pdm_project_poteaux_other AS 
-  SELECT osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, geometry AS geom
+  SELECT distinct on(osm_id) osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, geometry AS geom
   FROM osm_power_tower 
   WHERE type IN ('pole', 'tower') AND tags->'operator' IS NOT NULL AND tags->'operator'!='Enedis' AND St_geometryType(geometry)='ST_Point';
 
 CREATE VIEW pdm_project_poteaux_noop AS 
-  SELECT osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, geometry AS geom
+  SELECT distinct on(osm_id) osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, geometry AS geom
   FROM osm_power_tower 
   WHERE type IN ('pole', 'tower') AND tags->'operator' IS NULL AND St_geometryType(geometry)='ST_Point';
 
-  CREATE INDEX ON pdm_project_poteaux using gist(geom);
-  CREATE INDEX ON pdm_project_poteaux using btree(osm_id);
-
 CREATE MATERIALIZED VIEW pdm_project_substations AS 
-  SELECT osm_id, gid, name, hstore_to_json(tags) AS tags, ST_Centroid(geometry) AS geom
+  SELECT distinct on(osm_id) osm_id, gid, name, hstore_to_json(tags) AS tags, ST_Centroid(geometry) AS geom
   FROM (
     SELECT osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, tags, geometry
     FROM osm_power_substation
-    where tags->'operator'='Enedis' AND tags->'substation'='minor_distribution'
-    UNION SELECT osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, tags, geometry
-    FROM osm_power_tower where tags->'operator'='Enedis' AND (tags->'substation'='minor_distribution' OR tags->'substation'='minor_distribution')
+    where tags->'operator'='Enedis' AND tags->'substation' IN ('minor_distribution','industrial','distribution','generation')
+    UNION SELECT distinct on(osm_id) osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, tags, geometry
+    FROM osm_power_tower where tags->'operator'='Enedis' AND tags->'substation' IN ('minor_distribution','industrial','distribution','generation')
   ) data;
 
 CREATE INDEX ON pdm_project_substations using gist(geom);
@@ -85,12 +85,12 @@ CREATE INDEX ON pdm_project_substations using btree(osm_id);
 
 /* PDM FTTH */
 CREATE MATERIALIZED VIEW pdm_project_connpoints AS 
-  SELECT osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, ST_Centroid(geometry) AS geom
+  SELECT distinct on(osm_id) osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, ST_Centroid(geometry) AS geom
   FROM osm_telecom_sites
   WHERE type='connection_point';
 
 CREATE MATERIALIZED VIEW pdm_project_exchanges AS 
-  SELECT osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, ST_Centroid(geometry) AS geom
+  SELECT distinct on(osm_id) osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, ST_Centroid(geometry) AS geom
   FROM osm_telecom_sites
   WHERE type='exchange';
 
