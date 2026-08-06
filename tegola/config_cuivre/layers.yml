@@ -1,0 +1,185 @@
+field_sets:
+  osm_id:
+    - name: osm_id
+      sql: osm_id::text
+  geomt:
+    - name: geom
+      sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(geometry, !PIXEL_WIDTH! / 4), !BBOX!)
+  geom:
+    - name: geom
+      sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(geom, !PIXEL_WIDTH! / 4), !BBOX!)
+  tags_hstore:
+    - name: tags
+      sql: to_json(tags)::text
+  tags:
+    - name: tags
+      sql: tags::text
+  boundary:
+    - name: project_id
+    - name: admin_level
+    - name: boundary
+    - name: name
+  stats:
+    - name: stats
+      sql: stats::text
+    - name: delta_project
+    - name: delta_daily
+      
+layers:
+  # Misc natural features
+  - name: water_river
+    map: 
+      - natural
+    geometry_type: LineString
+    min_zoom: 3
+    id_field: osm_id
+    field_sets: [geom, name, wiki, start_date]
+    fields:
+      - name: location
+        sql: tags -> 'location'
+      - name: type
+      - name: tunnel
+        sql: tunnel
+      - name: intermittent
+        sql: tags -> 'intermittent'
+    from: osm_waterways
+    where: >
+      geometry && !BBOX! AND type IN ('river', 'stream', 'ditch', 'drain') AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
+  
+  - name: water_landmarks
+    map:
+      - natural
+    geometry_type: Point
+    min_zoom: 10
+    field_sets: [geom, name]
+    fields:
+      - name: height
+      - name: waterway
+        sql: tags -> 'waterway'
+      - name: ford
+        sql: tags -> 'ford'
+    id_field: osm_id
+    from: osm_waterways_landmarks
+    where: >
+      geometry && !BBOX!
+
+  - name: forest
+    map: 
+      - natural
+    geometry_type: Polygon
+    min_zoom: 8
+    id_field: osm_id
+    field_sets: [geom, name, wiki]
+    fields:
+      - name: leaf_type
+        sql: leaf_type
+      - name: leaf_cycle
+        sql: leaf_cycle
+    from: osm_landuse_forests
+    where: >
+      geometry && !BBOX! AND
+      St_GeometryType(geometry) IN ('ST_Polygon', 'ST_MultiPolygon')
+
+  # Cuivre
+  - name: communes
+    map:
+      - cuivre
+    geometry_type: Polygon
+    min_zoom: 7
+    max_zoom: 15
+    id_field: com_id
+    field_sets: [geom, wiki]
+    fields:
+      - name: name
+        sql: com_nom
+      - name: com_lot
+      - name: com_fc_annonce
+      - name: com_ft_annonce
+      - name: com_fc_ferme
+      - name: com_ft_ferme
+      - name: com_ftth_taux
+        sql: round(com_ftth_taux * 100, 1)
+      - name: com_loc_total
+    from: cuivre_communes
+    where: geometry && !BBOX!
+
+  - name: communes_points
+    map:
+      - cuivre
+    geometry_type: Point
+    max_zoom: 8
+    id_field: com_id
+    field_sets: [geom_centroid, area, wiki]
+    fields:
+      - name: name
+        sql: com_nom
+      - name: com_lot
+      - name: com_fc_annonce
+      - name: com_ft_annonce
+      - name: com_fc_ferme
+      - name: com_ft_ferme
+      - name: com_ftth_taux
+        sql: round(com_ftth_taux * 100, 1)
+      - name: com_loc_total
+    from: cuivre_communes
+    where: geometry && !BBOX!
+
+  - name: cuivre_adresses
+    map:
+      - cuivre
+    geometry_type: Point
+    min_zoom: 10
+    max_zoom: 15
+    id_field: cuivre_id
+    fields:
+      - name: geom
+        sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(cuivre_point_3857, !PIXEL_WIDTH! / 4), !BBOX!)
+      - name: cuivre_lot
+      - name: cuivre_adresse
+        sql: CONCAT(cuivre_num,' ',cuivre_voie,', ',cuivre_commune)
+      - name: fibre_imb
+      - name: fibre_absente
+      - name: cuivre_point_score
+        sql: round(cuivre_point_score * 100, 2)
+      - name: cuivre_point_scale
+    from: cuivre_adresses
+    where: >
+      (!ZOOM! >= 11 OR fibre_absente) AND cuivre_point_3857 && !BBOX!
+
+  - name: fibre_adresses
+    map:
+      - cuivre
+    geometry_type: Point
+    min_zoom: 11
+    max_zoom: 15
+    id_field: fibre_id
+    fields:
+      - name: geom
+        sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(fibre_point_3857, !PIXEL_WIDTH! / 4), !BBOX!)
+      - name: fibre_imb
+      - name: fibre_imb_cat
+      - name: fibre_imb_etat
+      - name: fibre_imb_type
+      - name: fibre_cuivre_fcr_on
+      - name: fibre_cuivre_ft_on
+      - name: fibre_adresse
+        sql: CONCAT(fibre_addr_num,' ',fibre_addr_voie_type,' ',fibre_addr_voie,', ',fibre_commune)
+    from: cuivre_fibre
+    where: fibre_point_3857 && !BBOX!
+
+  - name: cuivre_fibre_liens
+    map:
+      - cuivre
+    geometry_type: LineString
+    min_zoom: 11
+    max_zoom: 15
+    id_field: path_id
+    fields:
+      - name: geom
+        sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(path_3857, !PIXEL_WIDTH! / 4), !BBOX!)
+      - name: fibre_imb
+      - name: cuivre_addrrank
+      - name: cuivre_catreco
+      - name: error
+    from: cuivre_fibrepaths
+    where: path_3857 && !BBOX!

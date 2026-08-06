@@ -1,0 +1,13 @@
+webserver:
+  port: ":8083"
+
+cache: 
+  type: file
+  basepath: /tmp/tegola
+
+providers:
+  - name: postgis
+    type: mvt_postgis
+    uri: "${DB_URI}"
+    srid: 3857
+    max_connections: 20
