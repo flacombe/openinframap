@@ -247,7 +247,6 @@ layers:
 
   - name: power_substation
     map:
-      - openinframap
       - power
       - gespot
     geometry_type: Polygon
@@ -266,7 +265,6 @@ layers:
 
   - name: power_substation_point
     map:
-      - openinframap
       - power
       - gespot
     geometry_type: Point
@@ -286,7 +284,6 @@ layers:
 
   - name: power_plant
     map:
-      - openinframap
       - power
     geometry_type: Polygon
     min_zoom: 5
@@ -309,7 +306,6 @@ layers:
 
   - name: power_plant_point
     map:
-      - openinframap
       - power
     geometry_type: Point
     min_zoom: 5
@@ -334,7 +330,6 @@ layers:
 
   - name: power_generator
     map:
-      - openinframap
       - power
     geometry_type: Point
     min_zoom: 9
@@ -347,7 +342,6 @@ layers:
 
   - name: power_generator_area
     map:
-      - openinframap
       - power
     geometry_type: Polygon
     min_zoom: 13
@@ -362,7 +356,6 @@ layers:
 
   - name: power_transformer
     map:
-      - openinframap
       - power
     geometry_type: Point
     min_zoom: 14
@@ -373,7 +366,6 @@ layers:
 
   - name: power_compensator
     map:
-      - openinframap
       - power
     geometry_type: Point
     min_zoom: 14
@@ -393,7 +385,6 @@ layers:
 
   - name: power_switch
     map:
-      - openinframap
       - power
     geometry_type: Point
     min_zoom: 14
@@ -425,7 +416,6 @@ layers:
 
   - name: telecoms_communication_line
     map:
-      - openinframap
       - telecoms
       - gespot
     geometry_type: LineString
@@ -444,6 +434,8 @@ layers:
       AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
 
   - name: telecoms_sites
+    map:
+      - telecoms
     geometry_type: Polygon
     min_zoom: 10
     id_field: osm_id
@@ -464,6 +456,8 @@ layers:
     where: geometry && !BBOX!
 
   - name: telecoms_sites_points
+    map:
+      - telecoms
     geometry_type: Point
     min_zoom: 8
     id_field: osm_id
@@ -522,7 +516,6 @@ layers:
 
   - name: petroleum_pipeline
     map:
-      - openinframap
       - petroleum
     geometry_type: LineString
     min_zoom: 2
@@ -584,6 +577,8 @@ layers:
       AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
 
   - name: petroleum_marker
+    map:
+      - petroleum
     geometry_type: Point
     min_zoom: 15
     id_field: osm_id
@@ -600,7 +595,6 @@ layers:
 
   - name: petroleum_well
     map:
-      - openinframap
       - petroleum
     geometry_type: Point
     min_zoom: 10
@@ -611,7 +605,6 @@ layers:
 
   - name: petroleum_site
     map:
-      - openinframap
       - petroleum
     geometry_type: Polygon
     min_zoom: 13
@@ -628,6 +621,8 @@ layers:
       AND geometry && !BBOX!
 
   - name: petroleum_site_point
+    map:
+      - petroleum
     geometry_type: Point
     min_zoom: 5
     field_sets: [geom_centroid, area, name, construction, wiki, utility]
@@ -643,6 +638,9 @@ layers:
       AND geometry && !BBOX!
 
   - name: pipeline_gear
+    map:
+      - petroleum
+      - other_pipeline
     geometry_type: Point
     min_zoom: 8
     field_sets: [geom, name, actuator]
@@ -656,6 +654,8 @@ layers:
       geometry && !BBOX!
 
   - name: duct_inlet
+    map:
+      - other_pipeline
     geometry_type: Point
     min_zoom: 12
     field_sets: [geom, name, size, actuator]
@@ -669,6 +669,8 @@ layers:
       geometry && !BBOX!
 
   - name: duct_outlet
+    map:
+      - other_pipeline
     geometry_type: Point
     min_zoom: 12
     field_sets: [geom, name, size, actuator]
@@ -682,6 +684,8 @@ layers:
       geometry && !BBOX!
 
   - name: water_channel
+    map:
+      - water
     geometry_type: LineString
     min_zoom: 3
     id_field: osm_id
@@ -701,6 +705,8 @@ layers:
       geometry && !BBOX! AND type IN ('canal', 'pressurised') AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
 
   - name: water_body
+    map:
+      - water
     geometry_type: Polygon
     id_field: osm_id
     field_sets: [geom, name]
@@ -715,6 +721,8 @@ layers:
       geometry && !BBOX!
 
   - name: water_obstacle_poly
+    map:
+      - water
     geometry_type: Polygon
     min_zoom: 10
     id_field: osm_id
@@ -727,6 +735,8 @@ layers:
       St_GeometryType(geometry)='ST_Polygon'
 
   - name: water_obstacle_line
+    map:
+      - water
     geometry_type: LineString
     min_zoom: 10
     id_field: osm_id
@@ -739,21 +749,6 @@ layers:
       geometry && !BBOX! AND
       St_GeometryType(geometry)='ST_LineString' AND 
       ST_Length(geometry) > !PIXEL_WIDTH! / 4
-
-  - name: water_landmarks
-    geometry_type: Point
-    min_zoom: 10
-    field_sets: [geom, name]
-    fields:
-      - name: height
-      - name: waterway
-        sql: tags -> 'waterway'
-      - name: ford
-        sql: tags -> 'ford'
-    id_field: osm_id
-    from: osm_waterways_landmarks
-    where: >
-      geometry && !BBOX!
 
   - name: water_treatment_plant_polygon
     map:
@@ -872,54 +867,8 @@ layers:
     field_sets: [geom_centroid, name, wiki, start_date]
     from: osm_street_cabinet
     where: first_semi(utility) IN ('water', 'sewerage') AND geometry && !BBOX!
-    fields:
-      - name: location
-        sql: tags -> 'location'
-      - name: type
-      - name: tunnel
-        sql: tunnel
-      - name: intermittent
-        sql: tags -> 'intermittent'
-    from: osm_waterways
-    where: >
-      geometry && !BBOX! AND type IN ('river', 'stream', 'ditch', 'drain') AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
 
-  - name: water_river
-    map: 
-      - natural
-    geometry_type: LineString
-    min_zoom: 3
-    id_field: osm_id
-    field_sets: [geom, name, wiki, start_date]
-    fields:
-      - name: location
-        sql: tags -> 'location'
-      - name: type
-      - name: tunnel
-        sql: tunnel
-      - name: intermittent
-        sql: tags -> 'intermittent'
-    from: osm_waterways
-    where: >
-      geometry && !BBOX! AND type IN ('river', 'stream', 'ditch', 'drain') AND ST_Length(geometry) > !PIXEL_WIDTH! / 4
-
-  - name: forest
-    map: 
-      - natural
-    geometry_type: Polygon
-    min_zoom: 8
-    id_field: osm_id
-    field_sets: [geom, name, wiki]
-    fields:
-      - name: leaf_type
-        sql: leaf_type
-      - name: leaf_cycle
-        sql: leaf_cycle
-    from: osm_landuse_forests
-    where: >
-      geometry && !BBOX! AND
-      St_GeometryType(geometry) IN ('ST_Polygon', 'ST_MultiPolygon')
-
+  # Gespot features
   - name: utility_support
     map: 
       - gespot
@@ -932,106 +881,3 @@ layers:
       - name: transition
     from: osm_utility_support
     where: geometry && !BBOX!
-
-  - name: communes
-    map:
-      - cuivre
-    geometry_type: Polygon
-    min_zoom: 7
-    max_zoom: 15
-    id_field: com_id
-    field_sets: [geom, wiki]
-    fields:
-      - name: name
-        sql: com_nom
-      - name: com_lot
-      - name: com_fc_annonce
-      - name: com_ft_annonce
-      - name: com_fc_ferme
-      - name: com_ft_ferme
-      - name: com_ftth_taux
-        sql: round(com_ftth_taux * 100, 1)
-      - name: com_loc_total
-    from: cuivre_communes
-    where: geometry && !BBOX!
-
-  - name: communes_points
-    map:
-      - cuivre
-    geometry_type: Point
-    max_zoom: 8
-    id_field: com_id
-    field_sets: [geom_centroid, area, wiki]
-    fields:
-      - name: name
-        sql: com_nom
-      - name: com_lot
-      - name: com_fc_annonce
-      - name: com_ft_annonce
-      - name: com_fc_ferme
-      - name: com_ft_ferme
-      - name: com_ftth_taux
-        sql: round(com_ftth_taux * 100, 1)
-      - name: com_loc_total
-    from: cuivre_communes
-    where: geometry && !BBOX!
-
-  - name: cuivre_adresses
-    map:
-      - cuivre
-    geometry_type: Point
-    min_zoom: 10
-    max_zoom: 15
-    id_field: cuivre_id
-    fields:
-      - name: geom
-        sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(cuivre_point_3857, !PIXEL_WIDTH! / 4), !BBOX!)
-      - name: cuivre_lot
-      - name: cuivre_adresse
-        sql: CONCAT(cuivre_num,' ',cuivre_voie,', ',cuivre_commune)
-      - name: fibre_imb
-      - name: fibre_absente
-      - name: cuivre_point_score
-        sql: round(cuivre_point_score * 100, 2)
-      - name: cuivre_point_scale
-    from: cuivre_adresses
-    where: >
-      (!ZOOM! >= 11 OR fibre_absente) AND cuivre_point_3857 && !BBOX!
-
-  - name: fibre_adresses
-    map:
-      - cuivre
-    geometry_type: Point
-    min_zoom: 11
-    max_zoom: 15
-    id_field: fibre_id
-    fields:
-      - name: geom
-        sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(fibre_point_3857, !PIXEL_WIDTH! / 4), !BBOX!)
-      - name: fibre_imb
-      - name: fibre_imb_cat
-      - name: fibre_imb_etat
-      - name: fibre_imb_type
-      - name: fibre_cuivre_fcr_on
-      - name: fibre_cuivre_ft_on
-      - name: fibre_adresse
-        sql: CONCAT(fibre_addr_num,' ',fibre_addr_voie_type,' ',fibre_addr_voie,', ',fibre_commune)
-    from: cuivre_fibre
-    where: fibre_point_3857 && !BBOX!
-
-  - name: cuivre_fibre_liens
-    map:
-      - cuivre
-    geometry_type: LineString
-    min_zoom: 11
-    max_zoom: 15
-    id_field: path_id
-    fields:
-      - name: geom
-        sql: ST_AsMVTGeom(ST_SimplifyPreserveTopology(path_3857, !PIXEL_WIDTH! / 4), !BBOX!)
-      - name: fibre_imb
-      - name: cuivre_addrrank
-      - name: cuivre_catreco
-      - name: error
-    from: cuivre_fibrepaths
-    where: path_3857 && !BBOX!

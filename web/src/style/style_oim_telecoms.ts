@@ -1,8 +1,7 @@
 import { LayerSpecificationWithZIndex } from './types.ts'
-import { text_paint, operator_text, font, oimSymbol, construction_p, disused_p } from './common.js'
+import { text_paint, operator_text, font, oimSymbol, construction_p, disused_p, operator_label} from './common.js'
 import { get_local_name } from './common.ts'
 import { all, get, interpolate, match, not, rgb, zoom } from './stylehelpers.ts'
-import { text_paint, operator_text, operator_label, font, local_name } from './common.ts'
 import { DataDrivenPropertyValueSpecification, ExpressionSpecification } from 'maplibre-gl'
 
 // Colors
