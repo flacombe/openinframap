@@ -1,9 +1,6 @@
 from funcs import (
     table,
-    relation_tables,
-    generalized_table,
     str_col,
-    int_col,
     bool_col,
     type_col,
 )
@@ -32,5 +29,15 @@ table(
         str_col("colour"),
         str_col("material"),
         type_col
+    ],
+)
+
+table(
+    "street_cabinet",
+    {"man_made": ["street_cabinet"]},
+    ["points", "polygons"],
+    columns=[
+        str_col("utility"),
+        str_col("street_cabinet")
     ],
 )

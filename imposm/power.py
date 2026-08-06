@@ -113,8 +113,6 @@ table(
     {
         "power": [
             "switch",
-            "transformer",
-            "compensator",
             "converter",
         ]
     },
@@ -127,6 +125,33 @@ table(
     ],
 )
 
+table(
+    "power_transformer",
+    {
+        "power": "transformer"
+    },
+    ["points", "polygons"],
+    columns=[
+        str_col("voltage:primary"),
+        str_col("voltage:secondary"),
+        str_col("transformer"),
+        type_col
+    ],
+)
+
+table(
+    "power_compensator",
+    {
+        "power": "compensator"
+    },
+    ["points", "polygons"],
+    columns=[
+        str_col("voltage"),
+        str_col("compensator"),
+        str_col("frequency"),
+        type_col
+    ],
+)
 
 table(
     "power_plant",

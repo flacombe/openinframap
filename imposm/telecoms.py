@@ -50,10 +50,3 @@ table(
     ["points", "polygons"],
     columns=[type_col],
 )
-
-table(
-    "street_cabinet",
-    {"man_made": ["street_cabinet"]},
-    ["points", "polygons"],
-    columns=[str_col("utility")],
-)

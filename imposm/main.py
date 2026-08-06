@@ -2,7 +2,7 @@ import json
 from funcs import tables, generalized_tables
 
 import admin  # noqa
-import landuse  # noqa
+import imposm.natural as natural  # noqa
 import power  # noqa
 import telecoms  # noqa
 import petroleum  # noqa

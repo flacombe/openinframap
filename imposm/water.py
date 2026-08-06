@@ -14,13 +14,6 @@ table(
     columns=[type_col, str_col("name")],
 )
 
-table(
-    "pumping_station",
-    {"man_made": ["pumping_station"]},
-    "polygon",
-    columns=[str_col("name"), str_col("pumping_station"), str_col("substance")],
-)
-
 table("water_tower", {"man_made": ["water_tower"]}, ["points", "polygons"])
 
 table("water_well", {"man_made": ["water_well"]}, ["points", "polygons"])
@@ -78,43 +71,5 @@ table(
         str_col("water"),
         str_col("basin"),
         str_col("intermittent")
-    ],
-)
-
-table(
-    "inlets",
-    {"inlet": ["__any__"]},
-    "point",
-    columns=[
-        type_col,
-        str_col("name"),
-        str_col("operator"),
-        str_col("height"),
-        str_col("width"),
-        str_col("length"),
-        str_col("diameter"),
-        str_col("substance"),
-        str_col("flow_rate"),
-        str_col("actuator"),
-        str_col("handle")
-    ],
-)
-
-table(
-    "outlets",
-    {"outlet": ["__any__"]},
-    "point",
-    columns=[
-        type_col,
-        str_col("name"),
-        str_col("operator"),
-        str_col("height"),
-        str_col("width"),
-        str_col("length"),
-        str_col("diameter"),
-        str_col("substance"),
-        str_col("flow_rate"),
-        str_col("actuator"),
-        str_col("handle")
     ],
 )
