@@ -88,6 +88,11 @@ CREATE MATERIALIZED VIEW pdm_project_substations AS
 CREATE INDEX ON pdm_project_substations using gist(geom);
 CREATE INDEX ON pdm_project_substations using btree(osm_id);
 
+CREATE MATERIALIZED VIEW pdm_project_lines AS 
+  SELECT osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags), geometry as geom
+  FROM osm_power_line
+  where tags->'operator'='Enedis' AND type IN ('minor_line','cable');
+
 /* PDM FTTH */
 CREATE MATERIALIZED VIEW pdm_project_connpoints AS 
   SELECT distinct on(osm_id) osm_primitive_id(osm_id, geometry) AS osm_id, osm_id AS gid, tags->'name' AS name, hstore_to_json(tags) AS tags, ST_Centroid(geometry) AS geom
